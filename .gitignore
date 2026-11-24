@@ -1,0 +1,27 @@
+# Local secrets and machine settings
+.env
+.env.*
+!.env.example
+
+# Runtime data (SQLite, caches) and user outputs
+data/
+outputs/
+
+# Incomplete/misleading backups — do not publish
+_overwrite_bak/
+
+# Python caches (keep intentional package-level *.pyc next to missing .py)
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+*.lnk

@@ -1,0 +1,5 @@
+"""AGENTS HQ — local AI workforce management powered by Codex."""
+APP_NAME = "AGENTS HQ"
+TAGLINE = "Seven Agents. Endless Possibilities."
+CLIENT_NAME = "agent_hq"
+__version__ = "0.1.0"

@@ -1,0 +1,26 @@
+#!/bin/bash
+# AGENTS HQ.app entry point — starts the local server and opens an app window.
+set -e
+APP_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+# Prefer the project next to the .app (repo layout: macos/AGENTS HQ.app).
+ROOT="$(cd "$APP_DIR/.." && pwd)"
+if [ ! -f "$ROOT/start.command" ]; then
+  # Installed beside a copied project folder.
+  ROOT="$(cd "$APP_DIR/../.." && pwd)"
+fi
+if [ ! -f "$ROOT/start.command" ]; then
+  osascript -e 'display dialog "Could not find start.command next to AGENTS HQ.app.\nKeep the app inside the AGENTS HQ project (macos/AGENTS HQ.app)." buttons {"OK"} default button 1 with title "AGENTS HQ"'
+  exit 1
+fi
+
+cd "$ROOT"
+chmod +x "$ROOT/start.command" 2>/dev/null || true
+
+# Open a Terminal window that runs start.command so closing it stops the server.
+# The dashboard itself opens as a dedicated Chrome/Edge --app window.
+osascript <<EOF
+tell application "Terminal"
+  activate
+  do script "cd $(printf %q "$ROOT"); export AHQ_NO_PAUSE=1; ./start.command; exit"
+end tell
+EOF
