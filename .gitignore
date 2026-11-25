@@ -6,6 +6,8 @@
 # Runtime data (SQLite, caches) and user outputs
 data/
 outputs/
+.runtime/
+macos/AGENTS HQ.app/Contents/Resources/install.plist
 
 # Incomplete/misleading backups — do not publish
 _overwrite_bak/

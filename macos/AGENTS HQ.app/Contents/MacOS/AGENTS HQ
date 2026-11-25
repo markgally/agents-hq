@@ -1,26 +1,32 @@
 #!/bin/bash
-# AGENTS HQ.app entry point — starts the local server and opens an app window.
-set -e
-APP_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
-# Prefer the project next to the .app (repo layout: macos/AGENTS HQ.app).
-ROOT="$(cd "$APP_DIR/.." && pwd)"
-if [ ! -f "$ROOT/start.command" ]; then
-  # Installed beside a copied project folder.
-  ROOT="$(cd "$APP_DIR/../.." && pwd)"
+set -euo pipefail
+BIN_DIR="$(cd -P "$(dirname "$0")" && pwd)"
+CONFIG="$BIN_DIR/../Resources/install.plist"
+if [ -f "$CONFIG" ]; then
+  ROOT=$(/usr/bin/plutil -extract ProjectRoot raw -o - "$CONFIG")
+else
+  ROOT="$(cd "$BIN_DIR/../../../.." && pwd)"
 fi
-if [ ! -f "$ROOT/start.command" ]; then
-  osascript -e 'display dialog "Could not find start.command next to AGENTS HQ.app.\nKeep the app inside the AGENTS HQ project (macos/AGENTS HQ.app)." buttons {"OK"} default button 1 with title "AGENTS HQ"'
+error_dialog() {
+  /usr/bin/osascript - "$1" <<'APPLESCRIPT'
+on run argv
+  display alert "AGENTS HQ" message (item 1 of argv) as critical
+end run
+APPLESCRIPT
+}
+if [ ! -f "$ROOT/macos/bootstrap.sh" ]; then
+  error_dialog "The AGENTS HQ project folder was moved or removed. Run its Mac installer again from the new location."
   exit 1
 fi
-
-cd "$ROOT"
-chmod +x "$ROOT/start.command" 2>/dev/null || true
-
-# Open a Terminal window that runs start.command so closing it stops the server.
-# The dashboard itself opens as a dedicated Chrome/Edge --app window.
-osascript <<EOF
-tell application "Terminal"
-  activate
-  do script "cd $(printf %q "$ROOT"); export AHQ_NO_PAUSE=1; ./start.command; exit"
-end tell
-EOF
+mkdir -p "$ROOT/.runtime"
+if ! /bin/bash "$ROOT/macos/bootstrap.sh" >>"$ROOT/.runtime/mac-setup.log" 2>&1; then
+  error_dialog "Private Python setup failed. See $ROOT/.runtime/mac-setup.log, then run the Mac installer again."
+  exit 1
+fi
+PYTHON="$ROOT/.runtime/python/bin/python3"
+if ! "$PYTHON" "$ROOT/macos/setup.py" ensure >>"$ROOT/.runtime/mac-setup.log" 2>&1; then
+  error_dialog "Mac setup could not finish. See $ROOT/.runtime/mac-setup.log."
+  exit 1
+fi
+case "${1:-}" in -psn_*) shift ;; esac
+exec "$PYTHON" "$ROOT/macos/launcher.py" "$@"

@@ -6,7 +6,7 @@ AGENTS HQ is a local-first AI workforce manager. Seven permanent agents live in 
 
 ## Requirements
 
-- Python 3.10+ (stdlib only; no pip packages required to run)
+- Python 3.14.x (stdlib only; no pip packages required to run). The Mac installer downloads its own private runtime; older Python versions cannot load the recovered backend bytecode.
 - A signed-in Codex Desktop app or CLI
 - Windows, macOS, or Linux
 
@@ -20,18 +20,20 @@ AGENTS HQ is a local-first AI workforce manager. Seven permanent agents live in 
 
 ### macOS
 
-1. Double-click **`macos/AGENTS HQ.app`** (or `start.command`).
-2. A dedicated Chrome/Edge app window opens the dashboard.
-3. Keep the Terminal control window open — closing it stops the server.
+1. Double-click **`macos/Install AGENTS HQ.command`** once. It installs private Python 3.14, repairs app permissions, and creates Applications, Desktop and Dock entries.
+2. Click **AGENTS HQ in the Dock**. The dashboard opens with no Terminal window, and the server runs in the background.
+3. Use **`macos/Stop AGENTS HQ.command`** to stop it and its schedules. Closing the browser does not stop the Mac server.
+
+To restore a missing Dock icon, run **`macos/Add to Dock.command`**. If a downloaded ZIP lost executable permissions, run `bash "macos/Install AGENTS HQ.command"` from its project folder. Keep the project folder in place; the installed app uses it. See [the Mac guide](macos/README.md).
 
 ### Terminal (any OS)
 
 ```bat
-py -3 -m agent_hq
+py -3.14 -m agent_hq
 ```
 
 ```bash
-python3 -m agent_hq
+python3.14 -m agent_hq
 ```
 
 Dashboard: **http://127.0.0.1:4181/**

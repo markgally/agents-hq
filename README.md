@@ -18,7 +18,7 @@ A fresh clone has empty local data. Copy `.env.example` to `.env` if needed (lau
 
 ## Quick start
 
-AGENTS HQ runs as a local app: click the icon, use the dashboard window, close the app window to stop (schedules stop too).
+AGENTS HQ runs as a local app. On Windows, closing its dedicated app window stops the server. On Mac, the server runs in the background; closing the browser leaves it running. Use the Mac stop helper to stop it and its schedules.
 
 ### Windows
 
@@ -41,22 +41,24 @@ py -3 -m agent_hq
 
 ### macOS
 
-1. Double-click **`macos/AGENTS HQ.app`** (first time: right-click → Open if macOS blocks it).  
-   Or double-click `start.command`.
-2. A dedicated Chrome/Edge app window opens to the dashboard.
-3. Keep the Terminal control window open — closing it stops the server.
+1. Double-click **`macos/Install AGENTS HQ.command`** once. Setup downloads a checksum-verified private Python 3.14 runtime, repairs app permissions, and installs **`~/Applications/AGENTS HQ.app`** with Desktop and Dock shortcuts. Your system Python is unchanged.
+2. Click **AGENTS HQ in the Dock** to open the dashboard. It starts in the background with **no Terminal window**. Clicking it again reopens the existing server.
+3. To stop the server and schedules, double-click **`macos/Stop AGENTS HQ.command`**. Closing the browser alone leaves it running.
+
+For a downloaded copy blocked on first launch, use [Apple’s first-open instructions](https://support.apple.com/en-us/102445). If an extracted ZIP lost executable permissions, run this once from the project folder:
 
 ```bash
-chmod +x "macos/AGENTS HQ.app/Contents/MacOS/AGENTS HQ" start.command   # once if needed
-python3 -m agent_hq   # advanced / Linux
+bash "macos/Install AGENTS HQ.command"
 ```
+
+If the Dock icon was removed, run **`macos/Add to Dock.command`**. Keep the project folder in place after installation; the small installed app points to it. See the [Mac installation guide](macos/README.md) for paths, logs and setup options.
 
 ### Linux
 
 ```bash
 ./start.command
 # or
-python3 -m agent_hq
+python3.14 -m agent_hq
 ```
 
 Then open **http://127.0.0.1:4181/** (Chrome/Chromium `--app` mode when available).
@@ -90,7 +92,7 @@ The green **Run Everything** button collects eligible enabled assignments and di
 
 ## Scheduling
 
-Schedules run in the **backend**, not in the browser. Closing the dashboard does not stop them, but shutting down this computer or AGENTS HQ does. Default timezone: `Asia/Manila` (UTC stored internally).
+Schedules run in the **backend**, not in the browser. Closing the dashboard does not stop them, but shutting down this computer or AGENTS HQ does. On Mac, use the stop helper to stop the background server. Default timezone: `Asia/Manila` (UTC stored internally).
 
 ## Tests
 
