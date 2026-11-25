@@ -62,6 +62,29 @@ class PathPolicyTests(unittest.TestCase):
         self.assertEqual(self.policy.check_file(os.path.join(self.work, "ok.txt")), os.path.join(self.work, "ok.txt"))
         self.assertEqual(self.policy.resolve_relative(self.work, "ok.txt"), os.path.join(self.work, "ok.txt"))
 
+    def test_relative_paths_accept_both_separator_styles_inside_the_workspace(self):
+        folder = os.path.join(self.work, "notes")
+        os.makedirs(folder)
+        path = os.path.join(folder, "report.txt")
+        with open(path, "w") as fh:
+            fh.write("report")
+        for relative in ("notes/report.txt", "notes\\report.txt", "notes\\../notes/report.txt"):
+            with self.subTest(relative=relative):
+                self.assertEqual(self.policy.resolve_relative(self.work, relative), path)
+                self.assertEqual(self.policy.check_file(self.policy.resolve_relative(self.work, relative)), path)
+
+    def test_windows_and_mixed_separator_escapes_are_rejected_on_every_os(self):
+        for relative in ("..\\outside\\other.txt", "sub\\..\\..\\outside/other.txt",
+                         "sub/..\\../outside/other.txt", "\\etc\\passwd",
+                         "\\\\server\\share\\file.txt", "C:\\Windows\\file.txt", "C:relative.txt"):
+            with self.subTest(relative=relative), self.assertRaises(ApiError):
+                self.policy.resolve_relative(self.work, relative)
+
+    def test_invalid_relative_path_inputs_still_raise_api_errors(self):
+        for relative in (None, 123, [], "", "   ", "notes\\bad\x00name.txt"):
+            with self.subTest(relative=relative), self.assertRaises(ApiError):
+                self.policy.resolve_relative(self.work, relative)
+
     def test_traversal_and_outside_paths_are_rejected(self):
         for bad in (os.path.join(self.work, "..", "outside", "other.txt"), os.path.join(self.outside, "other.txt"),
                     "C:\\Windows\\System32\\drivers\\etc\\hosts", "/etc/passwd"):
@@ -96,6 +119,8 @@ class PathPolicyTests(unittest.TestCase):
             self.policy.check_file(os.path.join(link, "other.txt"))
         with self.assertRaises(ApiError):
             self.policy.resolve_relative(self.work, "link-out/other.txt")
+        with self.assertRaises(ApiError):
+            self.policy.resolve_relative(self.work, "link-out\\other.txt")
 
     def test_filenames_are_sanitised(self):
         self.assertNotIn("/", security.safe_filename("../../etc/passwd"))
@@ -302,7 +327,8 @@ class WorkspaceAndPermissionTests(unittest.TestCase):
             fh.write("notes")
         with open(os.path.join(h.tmp, "outside.txt"), "w") as fh:
             fh.write("outside")
-        for bad in ("../outside.txt", os.path.join(h.tmp, "outside.txt"), "../data/agent_hq.db", "missing.txt"):
+        for bad in ("../outside.txt", "..\\outside.txt", "sub/..\\../outside.txt",
+                    os.path.join(h.tmp, "outside.txt"), "../data/agent_hq.db", "missing.txt"):
             status, res = h.post("/api/agents/agent-01/messages", {"text": "read this", "attachments": [bad]})
             self.assertEqual(status, 400, bad)
         self.assertEqual(h.app.adapter.inference_requests, 0)

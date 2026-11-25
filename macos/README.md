@@ -99,4 +99,4 @@ other platforms skip this Mac-specific test module.
 
 To rebuild the existing artwork, use `.runtime/python/bin/python3 tools/make_icons.py`.
 
-See [the Mac validation report](../docs/MACOS_TEST_REPORT.md) for the verified installation path and the existing backend test limitation.
+See [the Mac validation report](../docs/MACOS_TEST_REPORT.md) for installation checks and the passing backend suite after the relative-path fix.

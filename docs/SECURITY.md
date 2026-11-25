@@ -12,6 +12,13 @@
 
 `PathPolicy` allowlists working and output roots. Private roots (AGENTS HQ data directory, `~/.codex`) are denied even if nested under an allowlisted path. Symlink / traversal escapes are rejected.
 
+Relative attachment paths use both `/` and `\` as separators on every platform.
+Backslashes are normalized before the existing absolute/drive/UNC checks and
+`realpath` working-folder boundary check. Paths such as `notes\report.txt` are
+valid inside the working folder; `..\outside.txt` and mixed-separator escapes
+are rejected on macOS/Linux as well as Windows. In this API, a backslash is a
+separator rather than a literal POSIX filename character.
+
 ## Secrets
 
 Logs, events, speech bubbles, and API errors run through redaction. Authentication material is never stored as ordinary plaintext settings fields by AGENTS HQ; Codex owns its own credential store, which AGENTS HQ does not read.

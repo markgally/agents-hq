@@ -32,7 +32,7 @@ Shell syntax checks, Python compilation, and `git diff --check` passed. App and
 command entry points are tracked as executable files; runtime downloads and local
 installation pointers are excluded from git.
 
-## Existing backend suite
+## Initial backend suite (before the relative-path fix)
 
 ```bash
 .runtime/python/bin/python3 -m unittest discover -s tests -v
@@ -50,3 +50,22 @@ previous timing-dependent failure was fixed by these installation changes.
 
 Windows launchers and the recovered backend bytecode are unchanged. Linux retains its direct Python entry point and a console fallback in `start.command`. Brief generation, read-aloud integrations,
 agent state, authentication, and source records are outside this change.
+
+## Follow-up: relative-path portability fixed
+
+The remaining assertion is resolved by the source facade in `agent_hq/security.py`:
+relative backslashes are normalized before the recovered policy's existing
+absolute-path, drive/UNC, realpath and working-folder boundary checks. The original
+`security.pyc` remains unchanged and required.
+
+Validation after this fix:
+
+- **29 security tests passed**, including the original failing assertion,
+  Windows/mixed-separator escapes, valid nested paths and symlink escapes.
+- **127 tests passed** in the complete backend and Mac regression suite:
+  `.runtime/python/bin/python3 -m unittest discover -s tests -v`.
+
+The three added tests cover valid separator variants, portable escape rejection,
+and invalid path inputs. Existing symlink and HTTP attachment tests also check
+backslash/mixed-separator escapes. The earlier 124-test result above is retained
+as the pre-fix baseline, not the current result.

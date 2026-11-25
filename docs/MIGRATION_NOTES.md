@@ -30,3 +30,10 @@ Fresh installs create `data/agent_hq.db`. There is no automatic import of old vi
 ## Bytecode note
 
 Several core modules (`app`, `db`, `events`, `security`, `execution`, `scheduler`, `codex.adapter`, `codex.rpc`, `codex.discovery`) are loaded from package-level `.pyc` files that match the verified pre-migration implementation, after an accidental source overwrite during this session. Do not delete those `.pyc` files. Matching `.py` service modules (`agents`, `threads`, `conversations`, …) remain as source.
+
+`security.py` now provides a source facade over the unchanged `security.pyc`.
+It preserves the recovered helpers and error classes in their original module
+namespace, and extends `PathPolicy.resolve_relative` to normalize Windows-style
+separators before the existing validation. This is a targeted portability fix,
+not recovery of the original security source. Keep `security.pyc`; CPython 3.14
+is still required.
